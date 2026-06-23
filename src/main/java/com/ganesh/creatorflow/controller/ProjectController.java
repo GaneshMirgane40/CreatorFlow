@@ -41,5 +41,14 @@ public class ProjectController {
                 projectService.getProjectById(id)
         );
     }
+    @PutMapping("/{projectId}/assign-editor/{editorId}")
+    public ResponseEntity<ProjectResponse> assignEditor(
+            @PathVariable Long projectId,
+            @PathVariable Long editorId
+    ) {
+        return ResponseEntity.ok(
+                projectService.assignEditor(projectId, editorId)
+        );
+    }
 
 }

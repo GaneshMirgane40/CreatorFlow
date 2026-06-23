@@ -72,5 +72,19 @@ public class ProjectService {
 
         return convertToProjectResponse(project);
     }
+    public ProjectResponse assignEditor(Long projectId, Long editorId) {
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        User editor = userRepository.findById(editorId)
+                .orElseThrow(() -> new RuntimeException("Editor not found"));
+
+        project.setAssignedEditor(editor);
+
+        Project savedProject = projectRepository.save(project);
+
+        return convertToProjectResponse(savedProject);
+    }
 
 }
