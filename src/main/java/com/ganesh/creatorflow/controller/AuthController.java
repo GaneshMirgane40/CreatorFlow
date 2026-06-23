@@ -5,6 +5,7 @@ import com.ganesh.creatorflow.dto.RegisterRequest;
 import com.ganesh.creatorflow.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.ganesh.creatorflow.dto.LoginRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,6 +20,15 @@ public class AuthController {
     ) {
         return new AuthResponse(
                 authService.register(request)
+        );
+    }
+    @PostMapping("/login")
+    public AuthResponse login(
+            @RequestBody LoginRequest request
+    ) {
+
+        return new AuthResponse(
+                authService.login(request)
         );
     }
 }
