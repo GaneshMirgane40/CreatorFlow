@@ -64,4 +64,13 @@ public class ProjectService {
                 .createdAt(project.getCreatedAt())
                 .build();
     }
+    public ProjectResponse getProjectById(Long id) {
+
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Project not found"));
+
+        return convertToProjectResponse(project);
+    }
+
 }

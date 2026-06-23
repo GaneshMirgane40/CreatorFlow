@@ -33,4 +33,13 @@ public class ProjectController {
         List<ProjectResponse> projects = projectService.getAllProjects();
         return ResponseEntity.ok(projects);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<ProjectResponse> getProjectById(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                projectService.getProjectById(id)
+        );
+    }
+
 }
