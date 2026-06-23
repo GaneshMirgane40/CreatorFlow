@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
@@ -24,5 +26,11 @@ public class ProjectController {
         String creatorEmail = authentication.getName();
         ProjectResponse response = projectService.createProject(request, creatorEmail);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProjectResponse>> getAllProjects() {
+        List<ProjectResponse> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
     }
 }
