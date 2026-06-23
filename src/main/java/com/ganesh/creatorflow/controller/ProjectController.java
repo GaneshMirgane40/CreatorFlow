@@ -1,6 +1,6 @@
 package com.ganesh.creatorflow.controller;
 
-import com.ganesh.creatorflow.dto.CreateProjectRequest;
+import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
-            @RequestBody CreateProjectRequest request,
+            @RequestBody ProjectRequest request,
             Authentication authentication
     ) {
         String creatorEmail = authentication.getName();

@@ -1,6 +1,6 @@
 package com.ganesh.creatorflow.service;
 
-import com.ganesh.creatorflow.dto.CreateProjectRequest;
+import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.User;
@@ -17,7 +17,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
 
-    public ProjectResponse createProject(CreateProjectRequest request, String creatorEmail) {
+    public ProjectResponse createProject(ProjectRequest request, String creatorEmail) {
         User creator = userRepository.findByEmail(creatorEmail)
                 .orElseThrow(() -> new RuntimeException("Creator not found"));
 
