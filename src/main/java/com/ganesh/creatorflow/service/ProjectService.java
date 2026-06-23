@@ -10,6 +10,9 @@ import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -39,6 +42,26 @@ public class ProjectService {
                 .assignedEditorEmail(savedProject.getAssignedEditor() != null ? 
                         savedProject.getAssignedEditor().getEmail() : null)
                 .createdAt(savedProject.getCreatedAt())
+                .build();
+    }
+
+    public List<ProjectResponse> getAllProjects() {
+        return projectRepository.findAll()
+                .stream()
+                .map(this::convertToProjectResponse)
+                .collect(Collectors.toList());
+    }
+
+    private ProjectResponse convertToProjectResponse(Project project) {
+        return ProjectResponse.builder()
+                .id(project.getId())
+                .title(project.getTitle())
+                .description(project.getDescription())
+                .status(project.getStatus().name())
+                .creatorEmail(project.getCreator().getEmail())
+                .assignedEditorEmail(project.getAssignedEditor() != null ? 
+                        project.getAssignedEditor().getEmail() : null)
+                .createdAt(project.getCreatedAt())
                 .build();
     }
 }
