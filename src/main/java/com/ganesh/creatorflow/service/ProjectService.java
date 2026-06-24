@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.ganesh.creatorflow.enums.Role;
 
 @Service
 @RequiredArgsConstructor
@@ -80,7 +81,26 @@ public class ProjectService {
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new RuntimeException("Editor not found"));
 
+        if (editor.getRole() != Role.EDITOR) {
+            throw new RuntimeException("User is not an editor");
+        }
+
         project.setAssignedEditor(editor);
+
+        Project savedProject = projectRepository.save(project);
+
+        return convertToProjectResponse(savedProject);
+    }
+    public ProjectResponse updateProjectStatus(
+            Long projectId,
+            ProjectStatus status
+    )
+    {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() ->
+                        new RuntimeException("Project not found"));
+
+        project.setStatus(status);
 
         Project savedProject = projectRepository.save(project);
 

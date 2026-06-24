@@ -2,6 +2,7 @@ package com.ganesh.creatorflow.controller;
 
 import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
+import com.ganesh.creatorflow.dto.UpdateProjectStatusRequest;
 import com.ganesh.creatorflow.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,18 @@ public class ProjectController {
     ) {
         return ResponseEntity.ok(
                 projectService.assignEditor(projectId, editorId)
+        );
+    }
+    @PutMapping("/{projectId}/status")
+    public ResponseEntity<ProjectResponse> updateStatus(
+            @PathVariable Long projectId,
+            @RequestBody UpdateProjectStatusRequest request
+    ) {
+        return ResponseEntity.ok(
+                projectService.updateProjectStatus(
+                        projectId,
+                        request.getStatus()
+                )
         );
     }
 
