@@ -106,5 +106,13 @@ public class ProjectService {
 
         return convertToProjectResponse(savedProject);
     }
+    public List<ProjectResponse> getProjectsForEditor(String email) {
+
+        return projectRepository
+                .findByAssignedEditorEmail(email)
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
 
 }

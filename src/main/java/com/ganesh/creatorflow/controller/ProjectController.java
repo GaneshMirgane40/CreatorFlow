@@ -63,5 +63,15 @@ public class ProjectController {
                 )
         );
     }
+    @GetMapping("/editor")
+    public ResponseEntity<List<ProjectResponse>> getEditorProjects(
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                projectService.getProjectsForEditor(
+                        authentication.getName()
+                )
+        );
+    }
 
 }
