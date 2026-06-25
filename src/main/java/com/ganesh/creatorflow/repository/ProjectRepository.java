@@ -11,4 +11,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByAssignedEditorEmail(String email);
 
+    List<Project> findByCreatorEmail(String email);
+
 }

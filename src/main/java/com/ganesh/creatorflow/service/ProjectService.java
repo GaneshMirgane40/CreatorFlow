@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 import com.ganesh.creatorflow.enums.Role;
 
 @Service
@@ -50,7 +50,7 @@ public class ProjectService {
         return projectRepository.findAll()
                 .stream()
                 .map(this::convertToProjectResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private ProjectResponse convertToProjectResponse(Project project) {
@@ -110,6 +110,15 @@ public class ProjectService {
 
         return projectRepository
                 .findByAssignedEditorEmail(email)
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
+
+    public List<ProjectResponse> getProjectsForCreator(String creatorEmail) {
+
+        return projectRepository
+                .findByCreatorEmail(creatorEmail)
                 .stream()
                 .map(this::convertToProjectResponse)
                 .toList();

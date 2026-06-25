@@ -78,4 +78,16 @@ public class ProjectController {
         );
     }
 
+    @GetMapping("/my-projects")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<List<ProjectResponse>> getMyProjects(
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                projectService.getProjectsForCreator(
+                        authentication.getName()
+                )
+        );
+    }
+
 }
