@@ -40,9 +40,11 @@ public class ProjectController {
     @GetMapping("/page")
     public ResponseEntity<List<ProjectResponse>> getProjectsPaginated(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
-        List<ProjectResponse> projects = projectService.getProjectsPaginated(page, size);
+        List<ProjectResponse> projects = projectService.getProjectsPaginated(page, size, sortBy, direction);
         return ResponseEntity.ok(projects);
     }
 

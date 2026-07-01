@@ -11,6 +11,7 @@ import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,8 +57,9 @@ public class ProjectService {
                 .toList();
     }
 
-    public List<ProjectResponse> getProjectsPaginated(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<ProjectResponse> getProjectsPaginated(int page, int size, String sortBy, String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         return projectRepository.findAll(pageable)
                 .stream()
                 .map(this::convertToProjectResponse)
