@@ -66,6 +66,13 @@ public class ProjectService {
                 .toList();
     }
 
+    public List<ProjectResponse> searchProjects(String keyword) {
+        return projectRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
+
     private ProjectResponse convertToProjectResponse(Project project) {
         return ProjectResponse.builder()
                 .id(project.getId())
