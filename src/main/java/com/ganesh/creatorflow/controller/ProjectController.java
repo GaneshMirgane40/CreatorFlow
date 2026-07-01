@@ -4,6 +4,7 @@ import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.dto.UpdateProjectStatusRequest;
 import com.ganesh.creatorflow.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,9 @@ public class ProjectController {
     @PostMapping
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<ProjectResponse> createProject(
-            @RequestBody ProjectRequest request,
+            @Valid @RequestBody ProjectRequest request,
             Authentication authentication
-    ) {
+    ){
         String creatorEmail = authentication.getName();
         ProjectResponse response = projectService.createProject(request, creatorEmail);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
