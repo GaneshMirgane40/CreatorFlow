@@ -5,6 +5,7 @@ import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.User;
 import com.ganesh.creatorflow.enums.ProjectStatus;
+import com.ganesh.creatorflow.exception.ProjectNotFoundException;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -69,14 +70,14 @@ public class ProjectService {
 
         Project project = projectRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Project not found"));
+                        new ProjectNotFoundException("Project not found"));
 
         return convertToProjectResponse(project);
     }
     public ProjectResponse assignEditor(Long projectId, Long editorId) {
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
 
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new RuntimeException("Editor not found"));
@@ -98,7 +99,7 @@ public class ProjectService {
     {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
-                        new RuntimeException("Project not found"));
+                        new ProjectNotFoundException("Project not found"));
 
         project.setStatus(status);
 
