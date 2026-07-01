@@ -36,6 +36,16 @@ public class ProjectController {
         List<ProjectResponse> projects = projectService.getAllProjects();
         return ResponseEntity.ok(projects);
     }
+
+    @GetMapping("/page")
+    public ResponseEntity<List<ProjectResponse>> getProjectsPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        List<ProjectResponse> projects = projectService.getProjectsPaginated(page, size);
+        return ResponseEntity.ok(projects);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(
             @PathVariable Long id

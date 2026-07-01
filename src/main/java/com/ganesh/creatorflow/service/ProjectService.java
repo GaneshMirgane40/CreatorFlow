@@ -9,6 +9,8 @@ import com.ganesh.creatorflow.exception.ProjectNotFoundException;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,6 +51,14 @@ public class ProjectService {
 
     public List<ProjectResponse> getAllProjects() {
         return projectRepository.findAll()
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
+
+    public List<ProjectResponse> getProjectsPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return projectRepository.findAll(pageable)
                 .stream()
                 .map(this::convertToProjectResponse)
                 .toList();
