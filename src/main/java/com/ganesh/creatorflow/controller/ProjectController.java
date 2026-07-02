@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import com.ganesh.creatorflow.enums.ProjectStatus;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
@@ -54,6 +55,14 @@ public class ProjectController {
     ) {
         List<ProjectResponse> projects = projectService.searchProjects(keyword);
         return ResponseEntity.ok(projects);
+    }
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProjectResponse>> filterProjectsByStatus(
+            @RequestParam ProjectStatus status
+    ) {
+        return ResponseEntity.ok(
+                projectService.filterProjectsByStatus(status)
+        );
     }
 
     @GetMapping("/{id}")
