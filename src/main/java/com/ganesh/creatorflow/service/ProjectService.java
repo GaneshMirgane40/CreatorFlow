@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import com.ganesh.creatorflow.specification.ProjectSpecification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -148,6 +150,18 @@ public class ProjectService {
 
         return projectRepository
                 .findByStatus(status)
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
+
+    public List<ProjectResponse> searchAndFilterProjects(String keyword, ProjectStatus status) {
+
+        Specification<Project> specification = Specification
+                .where(ProjectSpecification.hasKeyword(keyword))
+                .and(ProjectSpecification.hasStatus(status));
+
+        return projectRepository.findAll(specification)
                 .stream()
                 .map(this::convertToProjectResponse)
                 .toList();
