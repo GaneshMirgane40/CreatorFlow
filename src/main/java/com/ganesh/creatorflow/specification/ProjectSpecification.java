@@ -8,14 +8,19 @@ public class ProjectSpecification {
 
     public static Specification<Project> hasStatus(ProjectStatus status) {
 
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), status);
+        return (root, query, criteriaBuilder) -> {
+            if (status == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            return criteriaBuilder.equal(root.get("status"), status);
+        };
 
     }
     public static Specification<Project> hasKeyword(String keyword) {
 
         return (root, query, criteriaBuilder) -> {
-            if (keyword == null || keyword.trim().isEmpty()) {
+            if (keyword == null || keyword.isBlank()) {
                 return criteriaBuilder.conjunction();
             }
 
