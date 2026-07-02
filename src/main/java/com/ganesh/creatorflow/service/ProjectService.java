@@ -144,4 +144,13 @@ public class ProjectService {
                 .toList();
     }
 
+    public List<ProjectResponse> filterProjectsByStatus(ProjectStatus status) {
+
+        return projectRepository
+                .findByStatus(status)
+                .stream()
+                .map(this::convertToProjectResponse)
+                .toList();
+    }
+
 }
