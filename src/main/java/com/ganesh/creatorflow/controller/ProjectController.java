@@ -64,6 +64,15 @@ public class ProjectController {
                 projectService.filterProjectsByStatus(status)
         );
     }
+    @GetMapping("/search-filter")
+    public ResponseEntity<List<ProjectResponse>> searchAndFilterProjects(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) ProjectStatus status
+    ) {
+        return ResponseEntity.ok(
+                projectService.searchAndFilterProjects(keyword, status)
+        );
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(
