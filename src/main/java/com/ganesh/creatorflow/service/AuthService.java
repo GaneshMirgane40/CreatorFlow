@@ -1,6 +1,7 @@
 package com.ganesh.creatorflow.service;
 
 import com.ganesh.creatorflow.dto.RegisterRequest;
+import com.ganesh.creatorflow.dto.AuthServiceResponse;
 import com.ganesh.creatorflow.entity.User;
 import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public String register(RegisterRequest request) {
+    public AuthServiceResponse register(RegisterRequest request) {
 
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
-            return "Email already exists";
+            throw new RuntimeException("Email already exists");
         }
 
         User user = User.builder()
@@ -32,9 +33,13 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return "User registered successfully";
+        String token = jwtService.generateToken(user.getEmail());
+        String role = user.getRole().toString();
+
+        return new AuthServiceResponse(token, role);
     }
-    public String login(LoginRequest request) {
+
+    public AuthServiceResponse login(LoginRequest request) {
 
         User user = userRepository
                 .findByEmail(request.getEmail())
@@ -51,8 +56,9 @@ public class AuthService {
             );
         }
 
-        return jwtService.generateToken(
-                user.getEmail()
-        );
+        String token = jwtService.generateToken(user.getEmail());
+        String role = user.getRole().toString();
+
+        return new AuthServiceResponse(token, role);
     }
 }
