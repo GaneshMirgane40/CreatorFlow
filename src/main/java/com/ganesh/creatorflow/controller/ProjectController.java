@@ -2,6 +2,7 @@ package com.ganesh.creatorflow.controller;
 
 import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
+import com.ganesh.creatorflow.dto.UpdateProjectRequest;
 import com.ganesh.creatorflow.dto.UpdateProjectStatusRequest;
 import com.ganesh.creatorflow.service.ProjectService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -86,10 +88,15 @@ public class ProjectController {
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<ProjectResponse> assignEditor(
             @PathVariable Long projectId,
-            @PathVariable Long editorId
+            @PathVariable Long editorId,
+            Authentication authentication
     ) {
         return ResponseEntity.ok(
-                projectService.assignEditor(projectId, editorId)
+                projectService.assignEditor(
+                        projectId,
+                        editorId,
+                        authentication.getName()
+                )
         );
     }
     @PutMapping("/{projectId}/status")
@@ -127,6 +134,35 @@ public class ProjectController {
                         authentication.getName()
                 )
         );
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<ProjectResponse> updateProject(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateProjectRequest request,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                projectService.updateProject(
+                        id,
+                        request,
+                        authentication.getName()
+                )
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<Void> deleteProject(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        projectService.deleteProject(
+                id,
+                authentication.getName()
+        );
+        return ResponseEntity.noContent().build();
     }
 
 }

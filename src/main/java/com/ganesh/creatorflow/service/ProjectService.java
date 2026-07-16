@@ -2,6 +2,7 @@ package com.ganesh.creatorflow.service;
 
 import com.ganesh.creatorflow.dto.ProjectRequest;
 import com.ganesh.creatorflow.dto.ProjectResponse;
+import com.ganesh.creatorflow.dto.UpdateProjectRequest;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.User;
 import com.ganesh.creatorflow.enums.ProjectStatus;
@@ -95,10 +96,19 @@ public class ProjectService {
 
         return convertToProjectResponse(project);
     }
-    public ProjectResponse assignEditor(Long projectId, Long editorId) {
+    public ProjectResponse assignEditor(
+            Long projectId,
+            Long editorId,
+            String creatorEmail
+    ) {
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        // ✅ Ownership validation
+        if (!project.getCreator().getEmail().equals(creatorEmail)) {
+            throw new RuntimeException("You are not authorized to modify this project");
+        }
 
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new RuntimeException("Editor not found"));
@@ -165,6 +175,40 @@ public class ProjectService {
                 .stream()
                 .map(this::convertToProjectResponse)
                 .toList();
+    }
+
+    public ProjectResponse updateProject(
+            Long projectId,
+            UpdateProjectRequest request,
+            String creatorEmail
+    ) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        if (!project.getCreator().getEmail().equals(creatorEmail)) {
+            throw new RuntimeException("You are not authorized to update this project");
+        }
+
+        project.setTitle(request.getTitle());
+        project.setDescription(request.getDescription());
+
+        Project savedProject = projectRepository.save(project);
+
+        return convertToProjectResponse(savedProject);
+    }
+
+    public void deleteProject(
+            Long projectId,
+            String creatorEmail
+    ) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        if (!project.getCreator().getEmail().equals(creatorEmail)) {
+            throw new RuntimeException("You are not authorized to delete this project");
+        }
+
+        projectRepository.delete(project);
     }
 
 }
