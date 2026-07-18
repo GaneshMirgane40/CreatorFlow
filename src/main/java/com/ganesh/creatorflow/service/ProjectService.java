@@ -128,6 +128,10 @@ public class ProjectService {
             ProjectStatus status
     )
     {
+        System.out.println("====== updateProjectStatus called ======");
+        System.out.println("Project ID: " + projectId);
+        System.out.println("Status: " + status);
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
                         new ProjectNotFoundException("Project not found"));
@@ -135,6 +139,8 @@ public class ProjectService {
         project.setStatus(status);
 
         Project savedProject = projectRepository.save(project);
+
+        System.out.println("Status updated successfully.");
 
         return convertToProjectResponse(savedProject);
     }
