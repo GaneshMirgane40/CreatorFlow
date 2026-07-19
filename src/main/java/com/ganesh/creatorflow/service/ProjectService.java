@@ -5,10 +5,12 @@ import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.dto.UpdateProjectRequest;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.User;
+import com.ganesh.creatorflow.enums.ActivityType;
 import com.ganesh.creatorflow.enums.ProjectStatus;
 import com.ganesh.creatorflow.exception.ProjectNotFoundException;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,11 +24,13 @@ import java.util.List;
 import com.ganesh.creatorflow.enums.Role;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public ProjectResponse createProject(ProjectRequest request, String creatorEmail) {
         User creator = userRepository.findByEmail(creatorEmail)
@@ -40,6 +44,13 @@ public class ProjectService {
                 .build();
 
         Project savedProject = projectRepository.save(project);
+
+        activityService.logActivity(
+                savedProject,
+                creator,
+                ActivityType.PROJECT_CREATED,
+                "Project \"" + savedProject.getTitle() + "\" was created."
+        );
 
         return ProjectResponse.builder()
                 .id(savedProject.getId())
@@ -110,6 +121,8 @@ public class ProjectService {
             throw new RuntimeException("You are not authorized to modify this project");
         }
 
+        User creator = project.getCreator();
+
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new RuntimeException("Editor not found"));
 
@@ -121,26 +134,61 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
+        activityService.logActivity(
+                savedProject,
+                creator,
+                ActivityType.EDITOR_ASSIGNED,
+                "Assigned editor " + editor.getName() + " to the project."
+        );
+
         return convertToProjectResponse(savedProject);
     }
     public ProjectResponse updateProjectStatus(
             Long projectId,
-            ProjectStatus status
+            ProjectStatus status,
+            String userEmail
     )
     {
-        System.out.println("====== updateProjectStatus called ======");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("Status: " + status);
-
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
                         new ProjectNotFoundException("Project not found"));
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         project.setStatus(status);
 
         Project savedProject = projectRepository.save(project);
 
-        System.out.println("Status updated successfully.");
+        switch (status) {
+            case IN_PROGRESS -> activityService.logActivity(
+                    savedProject,
+                    user,
+                    ActivityType.WORK_STARTED,
+                    "Started working on \"" + savedProject.getTitle() + "\"."
+            );
+            case REVIEW -> activityService.logActivity(
+                    savedProject,
+                    user,
+                    ActivityType.SUBMITTED_FOR_REVIEW,
+                    "Submitted \"" + savedProject.getTitle() + "\" for review."
+
+            );
+            case APPROVED -> activityService.logActivity(
+                    savedProject,
+                    user,
+                    ActivityType.APPROVED,
+                    "Approved \"" + savedProject.getTitle() + "\"."
+            );
+            case PUBLISHED -> activityService.logActivity(
+                    savedProject,
+                    user,
+                    ActivityType.PUBLISHED,
+                    "Published \"" + savedProject.getTitle() + "\"."
+            );
+            default -> {
+            }
+        }
 
         return convertToProjectResponse(savedProject);
     }
