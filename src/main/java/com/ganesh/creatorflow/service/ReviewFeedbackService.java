@@ -5,22 +5,27 @@ import com.ganesh.creatorflow.dto.ReviewFeedbackResponse;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.ReviewFeedback;
 import com.ganesh.creatorflow.entity.User;
+import com.ganesh.creatorflow.enums.ActivityType;
 import com.ganesh.creatorflow.enums.ProjectStatus;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.ReviewFeedbackRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReviewFeedbackService {
 
     private final ReviewFeedbackRepository reviewFeedbackRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public ReviewFeedbackResponse submitFeedback(
             Long projectId,
@@ -50,6 +55,13 @@ public class ReviewFeedbackService {
         );
         project.setStatus(ProjectStatus.IN_PROGRESS);
         projectRepository.save(project);
+
+        activityService.logActivity(
+                project,
+                creator,
+                ActivityType.CHANGES_REQUESTED,
+                "Requested changes for \"" + project.getTitle() + "\"."
+        );
 
         return toResponse(savedFeedback);
     }

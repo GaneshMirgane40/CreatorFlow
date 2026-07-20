@@ -49,7 +49,7 @@ public class ProjectService {
                 savedProject,
                 creator,
                 ActivityType.PROJECT_CREATED,
-                "Project \"" + savedProject.getTitle() + "\" was created."
+                "Project \"" + project.getTitle() + "\" was created."
         );
 
         return ProjectResponse.builder()

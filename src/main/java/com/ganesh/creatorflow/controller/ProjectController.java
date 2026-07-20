@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
+
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -84,34 +84,23 @@ public class ProjectController {
                 projectService.getProjectById(id)
         );
     }
-    @PutMapping("/{projectId}/assign-editor/{editorId}")
-    @PreAuthorize("hasRole('CREATOR')")
-    public ResponseEntity<ProjectResponse> assignEditor(
-            @PathVariable Long projectId,
-            @PathVariable Long editorId,
-            Authentication authentication
-    ) {
-        return ResponseEntity.ok(
-                projectService.assignEditor(
-                        projectId,
-                        editorId,
-                        authentication.getName()
-                )
-        );
-    }
     @PutMapping("/{projectId}/status")
-    @PreAuthorize("hasRole('EDITOR')")
+//    @PreAuthorize("hasAnyRole('EDITOR','CREATOR')")
     public ResponseEntity<ProjectResponse> updateStatus(
             @PathVariable Long projectId,
-            @RequestBody UpdateProjectStatusRequest request
+            @RequestBody UpdateProjectStatusRequest request,
+            Authentication authentication
     ) {
         return ResponseEntity.ok(
                 projectService.updateProjectStatus(
                         projectId,
-                        request.getStatus()
+                        request.getStatus(),
+                        authentication.getName()
                 )
         );
     }
+
+
     @GetMapping("/editor")
     @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<List<ProjectResponse>> getEditorProjects(
