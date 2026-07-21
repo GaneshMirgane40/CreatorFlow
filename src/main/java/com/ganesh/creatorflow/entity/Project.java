@@ -49,6 +49,10 @@ public class Project {
             this.status = ProjectStatus.PENDING;
         }
     }
+    @OneToOne(mappedBy = "project",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private YouTubeVideo youtubeVideo;
 
     @JsonIgnore
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)

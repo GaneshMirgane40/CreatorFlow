@@ -7,5 +7,6 @@ public enum ActivityType {
     SUBMITTED_FOR_REVIEW,
     CHANGES_REQUESTED,
     APPROVED,
-    PUBLISHED
+    PUBLISHED,
+    VIDEO_LINKED
 }
