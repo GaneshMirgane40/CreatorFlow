@@ -23,4 +23,7 @@ public interface ProjectRepository extends
     long countByCreatorId(Long creatorId);
 
     long countByCreatorIdAndStatus(Long creatorId, ProjectStatus status);
+    long countByAssignedEditorId(Long editorId);
+
+    long countByAssignedEditorIdAndStatus(Long editorId, ProjectStatus status);
 }

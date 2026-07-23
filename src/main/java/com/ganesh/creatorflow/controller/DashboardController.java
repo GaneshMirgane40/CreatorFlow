@@ -1,6 +1,7 @@
 package com.ganesh.creatorflow.controller;
 
 import com.ganesh.creatorflow.dto.CreatorDashboardResponse;
+import com.ganesh.creatorflow.dto.EditorDashboardResponse;
 import com.ganesh.creatorflow.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,5 +20,10 @@ public class DashboardController {
     public CreatorDashboardResponse creatorDashboard(Authentication authentication) {
 
         return dashboardService.getCreatorDashboard(authentication.getName());
+    }
+    @GetMapping("/editor")
+    public EditorDashboardResponse editorDashboard(Authentication authentication) {
+
+        return dashboardService.getEditorDashboard(authentication.getName());
     }
 }

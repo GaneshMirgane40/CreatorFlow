@@ -7,6 +7,7 @@ import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.ganesh.creatorflow.dto.EditorDashboardResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,22 @@ public class DashboardService {
                 .reviewRequested(projectRepository.countByCreatorIdAndStatus(creatorId, ProjectStatus.REVIEW_REQUESTED))
                 .approved(projectRepository.countByCreatorIdAndStatus(creatorId, ProjectStatus.APPROVED))
                 .published(projectRepository.countByCreatorIdAndStatus(creatorId, ProjectStatus.PUBLISHED))
+                .build();
+    }
+    public EditorDashboardResponse getEditorDashboard(String email) {
+
+        User editor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Editor not found"));
+
+        Long editorId = editor.getId();
+
+        return EditorDashboardResponse.builder()
+                .assignedProjects(projectRepository.countByAssignedEditorId(editorId))
+                .inProgress(projectRepository.countByAssignedEditorIdAndStatus(editorId, ProjectStatus.IN_PROGRESS))
+                .underReview(projectRepository.countByAssignedEditorIdAndStatus(editorId, ProjectStatus.UNDER_REVIEW))
+                .reviewRequested(projectRepository.countByAssignedEditorIdAndStatus(editorId, ProjectStatus.REVIEW_REQUESTED))
+                .approved(projectRepository.countByAssignedEditorIdAndStatus(editorId, ProjectStatus.APPROVED))
+                .published(projectRepository.countByAssignedEditorIdAndStatus(editorId, ProjectStatus.PUBLISHED))
                 .build();
     }
 }
