@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class YouTubeApiService {
+public class YouTubeService {
 
     private final RestTemplate restTemplate;
 

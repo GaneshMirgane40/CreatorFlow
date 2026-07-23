@@ -3,7 +3,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.ganesh.creatorflow.service.YouTubeApiService;
+import com.ganesh.creatorflow.service.YouTubeService;
 
 import org.springframework.web.bind.annotation.RequestParam;
 @RestController
@@ -15,7 +15,7 @@ public class TestController {
     public String secureEndpoint() {
         return "JWT Authentication Working!";
     }
-    private final YouTubeApiService youTubeApiService;
+    private final YouTubeService youTubeApiService;
 
     @GetMapping("/youtube")
     public JsonNode testYoutube(@RequestParam String url) {

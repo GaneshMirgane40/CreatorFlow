@@ -8,7 +8,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.ganesh</groupId>
-	<artifactId>creatorflow </artifactId>
+	<artifactId>creatorflow</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
@@ -52,6 +52,10 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
@@ -93,7 +97,31 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.6.0</version>
 		</dependency>
+		<!-- Spring Security OAuth2 Client -->
+
+
+		<!-- Google API Client -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.7.2</version>
+		</dependency>
+
+		<!-- Google OAuth Client -->
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client</artifactId>
+			<version>1.39.0</version>
+		</dependency>
+
+		<!-- YouTube Data API -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-youtube</artifactId>
+			<version>v3-rev20250714-2.0.0</version>
+		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>

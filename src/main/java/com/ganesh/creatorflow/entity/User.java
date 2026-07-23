@@ -26,4 +26,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "creator",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private YouTubeAccount youtubeAccount;
 }

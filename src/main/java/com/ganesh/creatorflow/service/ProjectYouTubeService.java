@@ -24,7 +24,7 @@ public class ProjectYouTubeService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final YouTubeVideoRepository youTubeVideoRepository;
-    private final YouTubeApiService youTubeApiService;
+    private final YouTubeService youTubeApiService;
     private final ActivityService activityService;
     private final YouTubeVideoMapper youTubeVideoMapper;
 
@@ -32,7 +32,7 @@ public class ProjectYouTubeService {
             ProjectRepository projectRepository,
             UserRepository userRepository,
             YouTubeVideoRepository youTubeVideoRepository,
-            YouTubeApiService youTubeApiService,
+            YouTubeService youTubeApiService,
             ActivityService activityService,
             YouTubeVideoMapper youTubeVideoMapper
     ) {
