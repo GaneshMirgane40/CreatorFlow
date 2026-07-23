@@ -20,4 +20,7 @@ public interface ProjectRepository extends
 
     List<Project> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
     List<Project> findByStatus(ProjectStatus status);
+    long countByCreatorId(Long creatorId);
+
+    long countByCreatorIdAndStatus(Long creatorId, ProjectStatus status);
 }
