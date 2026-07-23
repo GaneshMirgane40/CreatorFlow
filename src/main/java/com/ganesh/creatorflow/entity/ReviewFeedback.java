@@ -1,9 +1,11 @@
 package com.ganesh.creatorflow.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,27 +14,31 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ReviewFeedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String feedback;
-
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    @JsonIgnore
-    private Project project;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submission_id", nullable = false)
+    private ProjectSubmission submission;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
-    @JsonIgnore
     private User creator;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
+    @Column(nullable = false)
+    private Boolean approved;
+
+    @Column(nullable = false)
+    private LocalDateTime reviewedAt;
+
+    @PrePersist
+    public void prePersist() {
+        reviewedAt = LocalDateTime.now();
+    }
 }

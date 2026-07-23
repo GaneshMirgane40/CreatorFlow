@@ -54,7 +54,5 @@ public class Project {
             fetch = FetchType.LAZY)
     private YouTubeVideo youtubeVideo;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewFeedback> reviewFeedbacks;
+
 }

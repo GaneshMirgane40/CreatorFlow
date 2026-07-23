@@ -16,7 +16,12 @@ import java.time.LocalDateTime;
 public class ReviewFeedbackResponse {
 
     private Long id;
+
     private String feedback;
+
     private String creatorEmail;
-    private LocalDateTime createdAt;
+
+    private Boolean approved;
+
+    private LocalDateTime reviewedAt;
 }

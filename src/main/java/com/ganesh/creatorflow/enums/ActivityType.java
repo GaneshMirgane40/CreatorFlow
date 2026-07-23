@@ -9,4 +9,5 @@ public enum ActivityType {
     APPROVED,
     PUBLISHED,
     VIDEO_LINKED
+
 }
