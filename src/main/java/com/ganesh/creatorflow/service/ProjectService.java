@@ -31,6 +31,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ActivityService activityService;
+    private final NotificationService notificationService;
 
     public ProjectResponse createProject(ProjectRequest request, String creatorEmail) {
         User creator = userRepository.findByEmail(creatorEmail)
@@ -134,12 +135,18 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
-        activityService.logActivity(
-                savedProject,
-                creator,
-                ActivityType.EDITOR_ASSIGNED,
-                "Assigned editor " + editor.getName() + " to the project."
-        );
+
+
+
+
+        if (savedProject.getAssignedEditor() != null) {
+            notificationService.createNotification(
+                    savedProject.getAssignedEditor(),
+                    savedProject,
+                    "Project Assigned",
+                    "You have been assigned to project \"" + savedProject.getTitle() + "\"."
+            );
+        }
 
         return convertToProjectResponse(savedProject);
     }
@@ -167,25 +174,44 @@ public class ProjectService {
                     ActivityType.WORK_STARTED,
                     "Started working on \"" + savedProject.getTitle() + "\"."
             );
-            case REVIEW -> activityService.logActivity(
-                    savedProject,
-                    user,
-                    ActivityType.SUBMITTED_FOR_REVIEW,
-                    "Submitted \"" + savedProject.getTitle() + "\" for review."
-
-            );
+            case REVIEW -> {
+                activityService.logActivity(
+                        savedProject,
+                        user,
+                        ActivityType.SUBMITTED_FOR_REVIEW,
+                        "Submitted \"" + savedProject.getTitle() + "\" for review."
+                );
+                if (savedProject.getCreator() != null) {
+                    notificationService.createNotification(
+                            savedProject.getCreator(),
+                            savedProject,
+                            "Project Submitted",
+                            "Your project \"" + savedProject.getTitle() + "\" has been submitted for review."
+                    );
+                }
+            }
             case APPROVED -> activityService.logActivity(
                     savedProject,
                     user,
                     ActivityType.APPROVED,
                     "Approved \"" + savedProject.getTitle() + "\"."
             );
-            case PUBLISHED -> activityService.logActivity(
-                    savedProject,
-                    user,
-                    ActivityType.PUBLISHED,
-                    "Published \"" + savedProject.getTitle() + "\"."
-            );
+            case PUBLISHED -> {
+                activityService.logActivity(
+                        savedProject,
+                        user,
+                        ActivityType.PUBLISHED,
+                        "Published \"" + savedProject.getTitle() + "\"."
+                );
+                if (savedProject.getCreator() != null) {
+                    notificationService.createNotification(
+                            savedProject.getCreator(),
+                            savedProject,
+                            "Project Published",
+                            "Your project \"" + savedProject.getTitle() + "\" has been published successfully."
+                    );
+                }
+            }
             default -> {
             }
         }

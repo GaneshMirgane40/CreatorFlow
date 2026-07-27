@@ -28,6 +28,7 @@ public class ReviewFeedbackService {
     private final UserRepository userRepository;
     private final ProjectSubmissionRepository submissionRepository;
     private final ActivityService activityService;
+    private final NotificationService notificationService;
 
     public ReviewFeedbackResponse submitFeedback(
             Long projectId,
@@ -76,6 +77,15 @@ public class ReviewFeedbackService {
                     "Approved project \"" + project.getTitle() + "\"."
             );
 
+            if (project.getAssignedEditor() != null) {
+                notificationService.createNotification(
+                        project.getAssignedEditor(),
+                        project,
+                        "Project Approved",
+                        "Your work on \"" + project.getTitle() + "\" has been approved."
+                );
+            }
+
         } else {
 
             project.setStatus(ProjectStatus.REVIEW_REQUESTED);
@@ -86,6 +96,15 @@ public class ReviewFeedbackService {
                     ActivityType.CHANGES_REQUESTED,
                     "Requested changes for \"" + project.getTitle() + "\"."
             );
+
+            if (project.getAssignedEditor() != null) {
+                notificationService.createNotification(
+                        project.getAssignedEditor(),
+                        project,
+                        "Changes Requested",
+                        "Changes have been requested for project \"" + project.getTitle() + "\"."
+                );
+            }
         }
 
         projectRepository.save(project);

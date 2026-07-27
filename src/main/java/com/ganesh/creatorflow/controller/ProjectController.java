@@ -153,5 +153,20 @@ public class ProjectController {
         );
         return ResponseEntity.noContent().build();
     }
+    @PutMapping("/{projectId}/assign-editor/{editorId}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<ProjectResponse> assignEditor(
+            @PathVariable Long projectId,
+            @PathVariable Long editorId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                projectService.assignEditor(
+                        projectId,
+                        editorId,
+                        authentication.getName()
+                )
+        );
+    }
 
 }

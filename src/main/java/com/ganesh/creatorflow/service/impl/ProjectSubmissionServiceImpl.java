@@ -14,6 +14,7 @@ import com.ganesh.creatorflow.enums.ProjectStatus;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.ProjectSubmissionRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
+import com.ganesh.creatorflow.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class ProjectSubmissionServiceImpl implements ProjectSubmissionService {
     private final ProjectRepository projectRepository;
     private final ProjectSubmissionRepository submissionRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -80,6 +82,16 @@ public class ProjectSubmissionServiceImpl implements ProjectSubmissionService {
         project.setStatus(ProjectStatus.UNDER_REVIEW);
 
         projectRepository.save(project);
+
+        if (project.getCreator() != null) {
+            notificationService.createNotification(
+                    project.getCreator(),
+                    project,
+                    "Project Submitted",
+                    "Your project \"" + project.getTitle() + "\" has been submitted for review."
+            );
+        }
+
         return SubmissionResponse.builder()
                 .submissionId(submission.getId())
                 .version(submission.getVersion())
