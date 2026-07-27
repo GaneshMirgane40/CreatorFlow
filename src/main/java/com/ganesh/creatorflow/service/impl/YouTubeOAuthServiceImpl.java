@@ -11,6 +11,7 @@ import com.ganesh.creatorflow.repository.UserRepository;
 import com.ganesh.creatorflow.repository.YouTubeAccountRepository;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -115,5 +116,52 @@ public class YouTubeOAuthServiceImpl implements YouTubeOAuthService {
         }
 
         youtubeAccountRepository.save(account);
+    }
+
+    @Override
+    public String getValidAccessToken(User creator) {
+        YouTubeAccount account = youtubeAccountRepository.findByCreator(creator)
+                .orElseThrow(() -> new IllegalStateException(
+                        "No YouTube account is connected for this creator."
+                ));
+
+        if (account.getTokenExpiry() != null
+                && account.getTokenExpiry().isAfter(LocalDateTime.now().plusMinutes(1))) {
+            return account.getAccessToken();
+        }
+
+        if (account.getRefreshToken() == null || account.getRefreshToken().isBlank()) {
+            throw new IllegalStateException(
+                    "The connected YouTube account must be reconnected before publishing."
+            );
+        }
+
+        try {
+            GoogleTokenResponse tokenResponse = new GoogleRefreshTokenRequest(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    account.getRefreshToken(),
+                    config.getClientId(),
+                    config.getClientSecret()
+            ).execute();
+
+            account.setAccessToken(tokenResponse.getAccessToken());
+            if (tokenResponse.getRefreshToken() != null && !tokenResponse.getRefreshToken().isBlank()) {
+                account.setRefreshToken(tokenResponse.getRefreshToken());
+            }
+            if (tokenResponse.getExpiresInSeconds() != null) {
+                account.setTokenExpiry(
+                        LocalDateTime.now().plusSeconds(tokenResponse.getExpiresInSeconds())
+                );
+            }
+
+            youtubeAccountRepository.save(account);
+            return account.getAccessToken();
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Unable to refresh the YouTube access token. Please reconnect your YouTube account.",
+                    exception
+            );
+        }
     }
 }
