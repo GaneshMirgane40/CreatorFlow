@@ -78,10 +78,11 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
         return ResponseEntity.ok(
-                projectService.getProjectById(id)
+                projectService.getProjectById(id, authentication.getName())
         );
     }
     @PutMapping("/{projectId}/status")
