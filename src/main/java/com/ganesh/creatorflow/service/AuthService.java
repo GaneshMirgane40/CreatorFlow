@@ -1,5 +1,7 @@
 package com.ganesh.creatorflow.service;
 
+import org.springframework.security.authentication.BadCredentialsException;
+
 import com.ganesh.creatorflow.dto.RegisterRequest;
 import com.ganesh.creatorflow.dto.AuthServiceResponse;
 import com.ganesh.creatorflow.entity.User;
@@ -40,22 +42,11 @@ public class AuthService {
     }
 
     public AuthServiceResponse login(LoginRequest request) {
-        System.out.println("Email received: " + request.getEmail());
-        System.out.println("All users: " + userRepository.findAll());
+        // Same error for unknown email and wrong password, so emails can't be probed.
         User user = userRepository
                 .findByEmail(request.getEmail())
-                .orElseThrow(
-                        () -> new RuntimeException("User not found")
-                );
-
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword())) {
-
-            throw new RuntimeException(
-                    "Invalid credentials"
-            );
-        }
+                .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         String token = jwtService.generateToken(user.getEmail());
         String role = user.getRole().toString();

@@ -44,3 +44,6 @@ build/
 # Local configuration
 src/main/resources/application-local.properties
 
+
+### Uploaded videos (local storage) ###
+uploads/
