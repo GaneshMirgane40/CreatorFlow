@@ -23,24 +23,9 @@ public class ProjectResponse {
 
     private String creatorEmail;
 
-    private String creatorName;
-
-    private Long assignedEditorId;
-
     private String assignedEditorEmail;
 
-    private String assignedEditorName;
+    private boolean sourceVideoAvailable;
 
     private LocalDateTime createdAt;
-
-    // Persisted YouTube metadata (null until the project is published)
-    private String youtubeVideoId;
-
-    private String youtubeUrl;
-
-    private String thumbnailUrl;
-
-    private String channelTitle;
-
-    private LocalDateTime publishedAt;
 }

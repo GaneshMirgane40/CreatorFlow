@@ -5,11 +5,10 @@ import com.ganesh.creatorflow.dto.ProjectResponse;
 import com.ganesh.creatorflow.dto.UpdateProjectRequest;
 import com.ganesh.creatorflow.entity.Project;
 import com.ganesh.creatorflow.entity.User;
-import com.ganesh.creatorflow.entity.YouTubeVideo;
-import org.springframework.security.access.AccessDeniedException;
 import com.ganesh.creatorflow.enums.ActivityType;
 import com.ganesh.creatorflow.enums.ProjectStatus;
 import com.ganesh.creatorflow.exception.ProjectNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import com.ganesh.creatorflow.repository.ProjectRepository;
 import com.ganesh.creatorflow.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,8 +19,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import com.ganesh.creatorflow.specification.ProjectSpecification;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 import com.ganesh.creatorflow.enums.Role;
 
@@ -34,6 +43,9 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final ActivityService activityService;
     private final NotificationService notificationService;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     public ProjectResponse createProject(ProjectRequest request, String creatorEmail) {
         User creator = userRepository.findByEmail(creatorEmail)
@@ -55,7 +67,17 @@ public class ProjectService {
                 "Project \"" + project.getTitle() + "\" was created."
         );
 
-        return convertToProjectResponse(savedProject);
+        return ProjectResponse.builder()
+                .id(savedProject.getId())
+                .title(savedProject.getTitle())
+                .description(savedProject.getDescription())
+                .status(savedProject.getStatus().name())
+                .creatorEmail(savedProject.getCreator().getEmail())
+                .assignedEditorEmail(savedProject.getAssignedEditor() != null ? 
+                        savedProject.getAssignedEditor().getEmail() : null)
+                .sourceVideoAvailable(savedProject.getSourceVideoPath() != null)
+                .createdAt(savedProject.getCreatedAt())
+                .build();
     }
 
     public List<ProjectResponse> getAllProjects() {
@@ -82,41 +104,70 @@ public class ProjectService {
     }
 
     private ProjectResponse convertToProjectResponse(Project project) {
-        User creator = project.getCreator();
-        User editor = project.getAssignedEditor();
-        YouTubeVideo video = project.getYoutubeVideo();
-
         return ProjectResponse.builder()
                 .id(project.getId())
                 .title(project.getTitle())
                 .description(project.getDescription())
                 .status(project.getStatus().name())
-                .creatorEmail(creator != null ? creator.getEmail() : null)
-                .creatorName(creator != null ? creator.getName() : null)
-                .assignedEditorId(editor != null ? editor.getId() : null)
-                .assignedEditorEmail(editor != null ? editor.getEmail() : null)
-                .assignedEditorName(editor != null ? editor.getName() : null)
+                .creatorEmail(project.getCreator().getEmail())
+                .assignedEditorEmail(project.getAssignedEditor() != null ? 
+                        project.getAssignedEditor().getEmail() : null)
+                .sourceVideoAvailable(project.getSourceVideoPath() != null)
                 .createdAt(project.getCreatedAt())
-                .youtubeVideoId(video != null ? video.getVideoId() : null)
-                .youtubeUrl(video != null ? video.getYoutubeUrl() : null)
-                .thumbnailUrl(video != null ? video.getThumbnailUrl() : null)
-                .channelTitle(video != null ? video.getChannelTitle() : null)
-                .publishedAt(video != null ? video.getPublishedAt() : null)
                 .build();
     }
 
-    private static boolean isParticipant(Project project, String email) {
-        return (project.getCreator() != null && project.getCreator().getEmail().equals(email))
-                || (project.getAssignedEditor() != null && project.getAssignedEditor().getEmail().equals(email));
+    public ProjectResponse uploadSourceVideo(Long projectId, MultipartFile video, String creatorEmail) throws IOException {
+        Project project = requireCreatorProject(projectId, creatorEmail);
+        if (video == null || video.isEmpty()) throw new IllegalArgumentException("Please upload a video.");
+        if (video.getContentType() == null || !video.getContentType().startsWith("video/")) {
+            throw new IllegalArgumentException("Only video files can be uploaded.");
+        }
+
+        Path directory = Paths.get(uploadDir, "source").toAbsolutePath().normalize();
+        Files.createDirectories(directory);
+        String originalName = video.getOriginalFilename() == null ? "source-video" : Paths.get(video.getOriginalFilename()).getFileName().toString();
+        String storedName = UUID.randomUUID() + "-" + originalName;
+        Path destination = directory.resolve(storedName).normalize();
+        if (!destination.startsWith(directory)) throw new IllegalArgumentException("Invalid file name.");
+        Files.copy(video.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+        project.setSourceVideoPath(destination.toString());
+        project.setSourceVideoFileName(originalName);
+        return convertToProjectResponse(projectRepository.save(project));
     }
 
+    public SourceVideo getSourceVideo(Long projectId, String userEmail) {
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+        boolean isCreator = project.getCreator().getEmail().equals(userEmail);
+        boolean isEditor = project.getAssignedEditor() != null && project.getAssignedEditor().getEmail().equals(userEmail);
+        if (!isCreator && !isEditor) throw new AccessDeniedException("You do not have access to this project.");
+        if (project.getSourceVideoPath() == null) throw new IllegalStateException("No source video has been uploaded.");
+        Path path = Paths.get(project.getSourceVideoPath());
+        if (!Files.exists(path)) throw new IllegalStateException("The source video file is unavailable.");
+        String contentType;
+        try { contentType = Files.probeContentType(path); } catch (IOException ignored) { contentType = null; }
+        return new SourceVideo(new FileSystemResource(path), project.getSourceVideoFileName(), contentType == null ? "video/mp4" : contentType);
+    }
+
+    private Project requireCreatorProject(Long projectId, String creatorEmail) {
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+        if (!project.getCreator().getEmail().equals(creatorEmail)) throw new AccessDeniedException("You do not have access to this project.");
+        return project;
+    }
+
+    public record SourceVideo(Resource resource, String fileName, String contentType) { }
     public ProjectResponse getProjectById(Long id, String userEmail) {
 
         Project project = projectRepository.findById(id)
                 .orElseThrow(() ->
                         new ProjectNotFoundException("Project not found"));
 
-        if (!isParticipant(project, userEmail)) {
+        boolean isCreator = project.getCreator() != null
+                && project.getCreator().getEmail().equals(userEmail);
+        boolean isEditor = project.getAssignedEditor() != null
+                && project.getAssignedEditor().getEmail().equals(userEmail);
+        if (!isCreator && !isEditor) {
             throw new AccessDeniedException("You do not have access to this project.");
         }
 
@@ -149,12 +200,9 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
 
-        activityService.logActivity(
-                savedProject,
-                creator,
-                ActivityType.EDITOR_ASSIGNED,
-                "Assigned " + editor.getName() + " to \"" + savedProject.getTitle() + "\"."
-        );
+
+
+
 
         if (savedProject.getAssignedEditor() != null) {
             notificationService.createNotification(
@@ -179,8 +227,6 @@ public class ProjectService {
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        validateStatusChange(project, status, user);
 
         project.setStatus(status);
 
@@ -237,34 +283,6 @@ public class ProjectService {
 
         return convertToProjectResponse(savedProject);
     }
-    /**
-     * Direct status changes are limited to starting work. Submitting, approving,
-     * requesting changes and publishing all go through their dedicated endpoints
-     * (submissions, feedback, publish) so the workflow can't be skipped.
-     */
-    private void validateStatusChange(Project project, ProjectStatus target, User user) {
-        if (!isParticipant(project, user.getEmail())) {
-            throw new AccessDeniedException("You are not part of this project.");
-        }
-        if (target == null) {
-            throw new IllegalArgumentException("Status is required.");
-        }
-
-        boolean isEditor = project.getAssignedEditor() != null
-                && project.getAssignedEditor().getId().equals(user.getId());
-
-        if (target != ProjectStatus.IN_PROGRESS || !isEditor) {
-            throw new IllegalStateException(
-                    "Status " + target + " can't be set directly. Use the upload, review or publish actions.");
-        }
-
-        ProjectStatus current = project.getStatus();
-        if (current != ProjectStatus.PENDING && current != ProjectStatus.REVIEW_REQUESTED) {
-            throw new IllegalStateException(
-                    "Work can only be started on pending projects or projects with requested changes.");
-        }
-    }
-
     public List<ProjectResponse> getProjectsForEditor(String email) {
 
         return projectRepository

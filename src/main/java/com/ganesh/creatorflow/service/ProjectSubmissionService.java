@@ -11,7 +11,6 @@ public interface ProjectSubmissionService {
             MultipartFile video,
             String editorEmail
     ) throws Exception;
-
     /** Latest submission of a project, or null when nothing has been submitted yet. */
     SubmissionResponse getLatestSubmission(Long projectId, String userEmail);
 

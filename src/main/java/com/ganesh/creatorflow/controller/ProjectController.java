@@ -9,8 +9,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -168,6 +172,25 @@ public class ProjectController {
                         authentication.getName()
                 )
         );
+    }
+
+    @PostMapping("/{projectId}/source-video")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<ProjectResponse> uploadSourceVideo(
+            @PathVariable Long projectId,
+            @RequestParam("video") MultipartFile video,
+            Authentication authentication
+    ) throws Exception {
+        return ResponseEntity.ok(projectService.uploadSourceVideo(projectId, video, authentication.getName()));
+    }
+
+    @GetMapping("/{projectId}/source-video")
+    public ResponseEntity<Resource> getSourceVideo(@PathVariable Long projectId, Authentication authentication) {
+        ProjectService.SourceVideo video = projectService.getSourceVideo(projectId, authentication.getName());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(video.contentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + video.fileName().replace("\"", "") + "\"")
+                .body(video.resource());
     }
 
 }

@@ -39,6 +39,10 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    private String sourceVideoPath;
+
+    private String sourceVideoFileName;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
