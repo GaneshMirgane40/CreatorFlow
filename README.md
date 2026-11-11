@@ -625,8 +625,7 @@ The project also provides a foundation for future improvements involving cloud s
 ## Author
 
 Developed as a full-stack web application project.
-CreatorFlow Frontend - https://github.com/GaneshMirgane40/CreatorFlow-Frontend
 
 **Frontend Repository:** [CreatorFlow-Frontend](https://github.com/GaneshMirgane40/CreatorFlow-Frontend)
 
-**Backend Repository:** Add the backend repository link here.
+**Backend Repository:**  [CreatorFlow-Backend](https://github.com/GaneshMirgane40/CreatorFlow)
